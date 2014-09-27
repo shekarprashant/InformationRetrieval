@@ -33,7 +33,8 @@ public class Test {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		BodyContentHandler handler=new BodyContentHandler(-1);
+		//BodyContentHandler handler=new BodyContentHandler(-1);
+		JSONTableContentHandler handler=new JSONTableContentHandler();
 		
 		/*SAXTransformerFactory factory = (SAXTransformerFactory)
 		SAXTransformerFactory.newInstance();
