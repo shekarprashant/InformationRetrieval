@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Set;
 
 import org.apache.tika.exception.TikaException;
@@ -21,10 +23,11 @@ import au.com.bytecode.opencsv.CSVReader;
 
 public class ParseTSV extends AbstractParser{
 
-	
+	XHTMLContentHandler xchHandler=null;
 	private static final Set<MediaType> SUPPORTED_TYPES = 
 	Collections.singleton(MediaType.text("tab-separated-values"));
-
+	Hashtable<String, Boolean> ht = new Hashtable<String, Boolean>();
+	Set<String> urlSet=new HashSet<String>();
 	//public static final String CSV_MIME_TYPE = "text/tab-separated-values";
 	
 	@Override
@@ -32,12 +35,33 @@ public class ParseTSV extends AbstractParser{
 	return SUPPORTED_TYPES;
 	}
 
+	private static final String[] HEADER_NAMES = {
+		"postedDate",
+		"location1",
+		"department",
+		"title",
+		"salary",
+		"start",
+		"duration",
+		"jobtype",
+		"applications",
+		"company",
+		"contactPerson",
+		"phoneNumber",
+		"faxNumber",
+		"location2",
+		"latitude",
+		"firstSeenDate",
+		"url",
+		"lastSeenDate"
+		};
+	
 	@Override
 	public void parse(InputStream inputStream, ContentHandler handler, Metadata metadata,
 			ParseContext context) throws IOException, SAXException, TikaException {
 		
 		//XHTMLContentHandler xchHandler=new XHTMLContentHandler(handler, metadata);
-		XHTMLContentHandler xchHandler=new XHTMLContentHandler(handler, metadata);
+		xchHandler=new XHTMLContentHandler(handler, metadata);
 		
 		//BufferedReader reader=new BufferedReader(new InputStreamReader(inputStream));
 		CSVReader csvReader=new CSVReader(new BufferedReader(new InputStreamReader(inputStream)), '\t');
@@ -46,122 +70,134 @@ public class ParseTSV extends AbstractParser{
 		xchHandler.startElement("table");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("Date");
+		xchHandler.characters("postedDate");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("2");
+		xchHandler.characters("location1");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("3");
+		xchHandler.characters("department");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("4");
+		xchHandler.characters("title");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("5");
+		xchHandler.characters("salary");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("6");
+		xchHandler.characters("start");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("7");
+		xchHandler.characters("duration");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("8");
+		xchHandler.characters("jobtype");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("9");
+		xchHandler.characters("applications");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("10");
+		xchHandler.characters("company");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("11");
+		xchHandler.characters("contactPerson");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("12");
+		xchHandler.characters("phoneNumber");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("13");
+		xchHandler.characters("faxNumber");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("14");
+		xchHandler.characters("location2");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("15");
+		xchHandler.characters("latitude");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("16");
+		xchHandler.characters("longitude");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("17");
+		xchHandler.characters("firstSeenDate");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("18");
+		xchHandler.characters("url");
 		xchHandler.endElement("th");
 		
 		xchHandler.startElement("th");
-		xchHandler.characters("19");
-		xchHandler.endElement("th");
+		xchHandler.characters("lastSeenDate");
+		xchHandler.endElement("th");		
 		
-		xchHandler.startElement("th");
-		xchHandler.characters("20");
-		xchHandler.endElement("th");
-		
-		String line=new String();
-		String[] splitLine=null;
 		String cell=new String();
 		
 		String[] nextLine;		
-		//while((line=)!=null)
-		//for(int j=0;j<allLines.length;j++)
+		
 		int count=0;
 		while ((nextLine = csvReader.readNext()) != null)
 		{
 			count++;
 			//System.out.println("Line length:"+nextLine.length);
-			if(nextLine.length!=20)
+			if(nextLine.length<20)
 			{
-				System.out.println("error:"+nextLine[0]+".length:"+nextLine.length);
-			}
-			xchHandler.startElement("tr");
-			for(int k=0;k<nextLine.length;k++)
+				System.out.println("error.Fields are less than 20:"+nextLine[0]+".length:"+nextLine.length);
+				System.out.println("Line count:"+count);
+				continue;
+			}			
+			
+			//if(metadata.get("enableDeduplication").equals("0") || !ht.containsKey(nextLine[18]))
+			if(metadata.get("enableDeduplication").equals("0") || !urlSet.contains(nextLine[18]))
 			{
-			cell=nextLine[k];
-			if(cell.equals("")||cell==null)
-			{
-				System.out.println("empty cell.Line count:"+count);
-			}
-			xchHandler.startElement("td");
-			xchHandler.characters(cell);
-			xchHandler.endElement("td");		
+				if(nextLine[18].trim().equals(""))
+					continue;
+					
+				//ht.put(nextLine[18], true);
+				urlSet.add(nextLine[18]);
+					
+				xchHandler.startElement("tr");
 				
+				for(int k=0;k<nextLine.length;k++)
+				{
+					xchHandler.startElement("td");
+					if(k==1)
+					{
+						cell=nextLine[k];
+						cell+="$$"+nextLine[k+1];
+						k++;
+					}
+					else
+					{
+						cell=nextLine[k];					
+					}
+						if(cell.equals("")||cell==null)
+							xchHandler.characters(" ");
+						else
+							xchHandler.characters(cell);					
+					
+					xchHandler.endElement("td");
+				}
+				xchHandler.endElement("tr");
 			}
-			xchHandler.endElement("tr");						
 		}
 		xchHandler.endElement("table");
 		
 		xchHandler.endDocument();
-		
-		String xhtml = Test.sw.toString();
-        System.out.println("xhtml:"+xhtml);
 		
 	}
 
