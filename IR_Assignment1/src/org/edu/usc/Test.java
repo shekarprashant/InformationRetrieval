@@ -27,9 +27,9 @@ public class Test {
 		StringWriter sw = new StringWriter();
 		long totalCount=0;
 		ParseTSV tsv = new ParseTSV();
-		File dir = new File("D:/json");
+		File dir = new File("/Users/phalkurumashanka/Documents/USC/FALL 2014/CSCI572/Assignments/Assignment1/JSONWithDedup");
 		dir.mkdir();
-		File files = new File("D:\\IR\\Data");
+		File files = new File("/Users/phalkurumashanka/Documents/employment");
 		for (File file : files.listFiles()) {
 			System.out.println("File name:"+file.getName());
 			InputStream is = null;

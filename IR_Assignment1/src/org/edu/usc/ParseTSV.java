@@ -167,7 +167,6 @@ public class ParseTSV extends AbstractParser{
 				if(nextLine[18].trim().equals(""))
 					continue;
 					
-				//ht.put(nextLine[18], true);
 				urlSet.add(nextLine[18]);
 					
 				xchHandler.startElement("tr");
@@ -175,19 +174,11 @@ public class ParseTSV extends AbstractParser{
 				for(int k=0;k<nextLine.length;k++)
 				{
 					xchHandler.startElement("td");
-					if(k==1)
-					{
-						cell=nextLine[k];
-						cell+="$$"+nextLine[k+1];
-						k++;
-					}
-					else
-					{
-						cell=nextLine[k];					
-					}
-						if(cell.equals("")||cell==null)
+					cell=nextLine[k];					
+					
+					if(cell.equals("")||cell==null)
 							xchHandler.characters(" ");
-						else
+					else
 							xchHandler.characters(cell);					
 					
 					xchHandler.endElement("td");

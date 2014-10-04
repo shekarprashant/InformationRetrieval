@@ -20,7 +20,7 @@ public class JSONTableContentHandler extends DefaultHandler {
 	JSONArray array = new JSONArray();
 	JSONObject object = null;
 	List<String> headerNames = new ArrayList<String>();
-	int row = 0, cell = 0, headerCount = 0,jsonCount =0;
+	int row = 0, cell = 0, headerIndex = 0, headerCount = 0,jsonCount =0;
 
 	public int getArraySize()
 	{
@@ -36,6 +36,10 @@ public class JSONTableContentHandler extends DefaultHandler {
 		} else if (local.equalsIgnoreCase("td")) {
 			// super.startElement(null,"td","td",null);
 			cell++;
+			
+			if(cell != 3)
+				headerIndex++;
+			
 		} else if (local.equalsIgnoreCase("tr")) {
 			// super.startElement(null,"th","th",null);
 			row++;
@@ -52,6 +56,7 @@ public class JSONTableContentHandler extends DefaultHandler {
 			// super.endElement(null,"tr","tr");
 			if (cell == 20) {
 				cell = 0;
+				headerIndex = 0;
 				jsonCount++;
 			}
 		}
@@ -158,34 +163,24 @@ public class JSONTableContentHandler extends DefaultHandler {
 		if (cell == 1) {
 			object = new JSONObject();
 			str = getStringFromCharArray(ch);
-			if(str.equals(" "))
-			{
-				object.put(headerNames.get(cell - 1), "");
-			}
-			else
-			{
-				object.put(headerNames.get(cell - 1), str);
-			}
+			
+			object.put(headerNames.get(headerIndex - 1), str.trim());
+			
 			str = "";
 		} else if (cell == 20) {
 			str = getStringFromCharArray(ch);
-			if(str.equals(" "))
-			{
-				object.put(headerNames.get(cell - 1), "");
-			}
-			else
-			{
-				object.put(headerNames.get(cell - 1), str);
-			}
+			
+			object.put(headerNames.get(headerIndex - 1), str);
+			
 			str = "";
 			//create the json file
-			String fileName=object.get("url").toString().replace('\\', '_');
+			/*String fileName=object.get("url").toString().replace(".", "_").replace('/', '_').replace("\\","_");
 			String uglyJson=object.toJSONString();
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			JsonParser jp = new JsonParser();
 			JsonElement je = jp.parse(uglyJson);
 			String beautifulJson=gson.toJson(je);
-			String jsonFilePath="D:/json/"+fileName+System.currentTimeMillis()+".json";
+			String jsonFilePath="/Users/phalkurumashanka/Documents/USC/FALL 2014/CSCI572/Assignments/Assignment1/JSONWithDedup/"+fileName+System.currentTimeMillis()+".json";
 			FileWriter jsonFileWriter = null;
 			try
 			{
@@ -198,30 +193,27 @@ public class JSONTableContentHandler extends DefaultHandler {
 			catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
 			array.add(object);
 			//System.out.println("Array size:"+array.size());
 			object = null;
 		} else if (row >= 1) {
 			str = getStringFromCharArray(ch);
-			/*if(str.equals(" "))
-			{
-				object.put(headerNames.get(cell - 1), "");
-			}
-			else
-			{
-				object.put(headerNames.get(cell - 1), str);
-			}*/
-			if(str.contains("$$"))
+			
+			if(cell == 2)
 			{
 				locObject=new JSONObject();
-				locObject.put("city", str.split("$$")[0]);
-				locObject.put("state", str.split("$$")[1]);
-				object.put(headerNames.get(cell - 1), locObject);
+				locObject.put("city", str);
+				object.put(headerNames.get(1), locObject);
+			}
+			else if (cell == 3)
+			{
+				locObject=(JSONObject) object.get(headerNames.get(1));	
+				locObject.put("state", str);
 			}
 			else
 			{
-				object.put(headerNames.get(cell - 1), str.trim());
+				object.put(headerNames.get(headerIndex - 1), str.trim());
 			}
 			str = "";
 		}
