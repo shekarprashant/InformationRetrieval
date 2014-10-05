@@ -4,9 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.tika.exception.TikaException;
@@ -23,160 +24,128 @@ import au.com.bytecode.opencsv.CSVReader;
 
 public class ParseTSV extends AbstractParser{
 
-	XHTMLContentHandler xchHandler=null;
-	private static final Set<MediaType> SUPPORTED_TYPES = 
-	Collections.singleton(MediaType.text("tab-separated-values"));
-	Hashtable<String, Boolean> ht = new Hashtable<String, Boolean>();
-	Set<String> urlSet=new HashSet<String>();
-	//public static final String CSV_MIME_TYPE = "text/tab-separated-values";
+	private static final long serialVersionUID = 1L;
+	
+	private XHTMLContentHandler xchHandler = null;
+	private static final Set<MediaType> SUPPORTED_TYPES = Collections.singleton(MediaType.text("tab-separated-values"));
+	private Set<String> keySet = new HashSet<String>();
+	
+	public static final String ENABLE_DEDUPLICATION = "enableDeduplication";
+	public static final String HEADER_NAMES = "headerNames";
+	public static final String KEY_INDEXES = "keyIndexes";
+	public static final String IGNORE_INDEXES = "ignoreIndexes";
 	
 	@Override
 	public Set<MediaType> getSupportedTypes(ParseContext context) {
-	return SUPPORTED_TYPES;
+		return SUPPORTED_TYPES;
 	}
 
-	private static final String[] HEADER_NAMES = {
-		"postedDate",
-		"location1",
-		"department",
-		"title",
-		"salary",
-		"start",
-		"duration",
-		"jobtype",
-		"applications",
-		"company",
-		"contactPerson",
-		"phoneNumber",
-		"faxNumber",
-		"location2",
-		"latitude",
-		"firstSeenDate",
-		"url",
-		"lastSeenDate"
-		};
 	
 	@Override
 	public void parse(InputStream inputStream, ContentHandler handler, Metadata metadata,
 			ParseContext context) throws IOException, SAXException, TikaException {
 		
-		//XHTMLContentHandler xchHandler=new XHTMLContentHandler(handler, metadata);
 		xchHandler=new XHTMLContentHandler(handler, metadata);
-		
-		//BufferedReader reader=new BufferedReader(new InputStreamReader(inputStream));
-		CSVReader csvReader=new CSVReader(new BufferedReader(new InputStreamReader(inputStream)), '\t');
-		
 		xchHandler.startDocument();		
 		xchHandler.startElement("table");
+
+		String headerNames = metadata.get(HEADER_NAMES);		
+		if(headerNames == null)
+			throw new NullPointerException();
 		
-		xchHandler.startElement("th");
-		xchHandler.characters("postedDate");
-		xchHandler.endElement("th");
+		String enableDeduplication = metadata.get(ENABLE_DEDUPLICATION);		
+		if(enableDeduplication == null)
+			throw new NullPointerException();
 		
-		xchHandler.startElement("th");
-		xchHandler.characters("location1");
-		xchHandler.endElement("th");
+		boolean dedupFlag = enableDeduplication.equals("1");
 		
-		xchHandler.startElement("th");
-		xchHandler.characters("department");
-		xchHandler.endElement("th");
+		String keyIndexes = metadata.get(KEY_INDEXES);
+		String ignoreIndexes = metadata.get(IGNORE_INDEXES);
 		
-		xchHandler.startElement("th");
-		xchHandler.characters("title");
-		xchHandler.endElement("th");
 		
-		xchHandler.startElement("th");
-		xchHandler.characters("salary");
-		xchHandler.endElement("th");
+		String[] headerNamesArray = headerNames.split("\t");
+		JSONTableContentHandler jsonHandler=(JSONTableContentHandler)handler;
+		jsonHandler.setTotalColumnsInARow(headerNamesArray.length);
+		for(int i=0; i < headerNamesArray.length; i++)
+		{
+			xchHandler.startElement("th");
+			xchHandler.characters(headerNamesArray[i]);
+			xchHandler.endElement("th");
+		}
 		
-		xchHandler.startElement("th");
-		xchHandler.characters("start");
-		xchHandler.endElement("th");
 		
-		xchHandler.startElement("th");
-		xchHandler.characters("duration");
-		xchHandler.endElement("th");
+		List<Integer> keyIndexList = null;
+		if (keyIndexes != null)
+		{	
+			String[] keyIndexesArray = keyIndexes.split("\t");
+			keyIndexList = new ArrayList<>();
+			for(int i=0; i < keyIndexesArray.length; i++)
+			{
+				int keyIndex = Integer.parseInt(keyIndexesArray[i]);
+				if(keyIndex >= 0)
+					keyIndexList.add(keyIndex);
+			}
+		}
 		
-		xchHandler.startElement("th");
-		xchHandler.characters("jobtype");
-		xchHandler.endElement("th");
+		List<Integer> ignoreIndexList = null;
+		if (keyIndexes != null)
+		{	
+			String[] ignoreIndexArray = ignoreIndexes.split("\t");
+			ignoreIndexList = new ArrayList<>();
+			for(int i=0; i < ignoreIndexArray.length; i++)
+			{
+				int ignoreIndex = Integer.parseInt(ignoreIndexArray[i]);
+				if(ignoreIndex >= 0)
+					ignoreIndexList.add(ignoreIndex);
+			}
+		}
 		
-		xchHandler.startElement("th");
-		xchHandler.characters("applications");
-		xchHandler.endElement("th");
 		
-		xchHandler.startElement("th");
-		xchHandler.characters("company");
-		xchHandler.endElement("th");
-		
-		xchHandler.startElement("th");
-		xchHandler.characters("contactPerson");
-		xchHandler.endElement("th");
-		
-		xchHandler.startElement("th");
-		xchHandler.characters("phoneNumber");
-		xchHandler.endElement("th");
-		
-		xchHandler.startElement("th");
-		xchHandler.characters("faxNumber");
-		xchHandler.endElement("th");
-		
-		xchHandler.startElement("th");
-		xchHandler.characters("location2");
-		xchHandler.endElement("th");
-		
-		xchHandler.startElement("th");
-		xchHandler.characters("latitude");
-		xchHandler.endElement("th");
-		
-		xchHandler.startElement("th");
-		xchHandler.characters("longitude");
-		xchHandler.endElement("th");
-		
-		xchHandler.startElement("th");
-		xchHandler.characters("firstSeenDate");
-		xchHandler.endElement("th");
-		
-		xchHandler.startElement("th");
-		xchHandler.characters("url");
-		xchHandler.endElement("th");
-		
-		xchHandler.startElement("th");
-		xchHandler.characters("lastSeenDate");
-		xchHandler.endElement("th");		
-		
-		String cell=new String();
-		
+		String cell;		
 		String[] nextLine;		
 		
-		int count=0;
+		CSVReader csvReader=new CSVReader(new BufferedReader(new InputStreamReader(inputStream)), '\t');
+		
 		while ((nextLine = csvReader.readNext()) != null)
 		{
-			count++;
-			//System.out.println("Line length:"+nextLine.length);
-			if(nextLine.length<20)
-			{
-				System.out.println("error.Fields are less than 20:"+nextLine[0]+".length:"+nextLine.length);
-				System.out.println("Line count:"+count);
-				continue;
-			}			
+	
 			
-			//if(metadata.get("enableDeduplication").equals("0") || !ht.containsKey(nextLine[18]))
-			if(metadata.get("enableDeduplication").equals("0") || !urlSet.contains(nextLine[18]))
+			jsonHandler.setTotalColumnsInARow(nextLine.length - ignoreIndexList.size());
+			
+			StringBuffer keyStringBuffer = new StringBuffer();
+			String keyString = null;
+			if (keyIndexes == null)
 			{
-				if(nextLine[18].trim().equals(""))
-					continue;
-					
-				urlSet.add(nextLine[18]);
-					
+				for(int i = 0; i < nextLine.length; i++)
+					keyStringBuffer.append(nextLine[i]);
+			}
+			else
+			{
+				for(Integer keyIndex: keyIndexList)
+				{
+					if (nextLine.length > keyIndex)
+						keyStringBuffer.append(nextLine[keyIndex]);
+				}
+			}
+			if(keyStringBuffer.length() > 0)
+				keyString = keyStringBuffer.toString();
+			
+			if(!dedupFlag || !keySet.contains(keyString))
+			{
+				if(dedupFlag) 
+					keySet.add(keyString);
+				
 				xchHandler.startElement("tr");
 				
-				for(int k=0;k<nextLine.length;k++)
+				for(int k = 0; k < nextLine.length; k++)
 				{
-					xchHandler.startElement("td");
-					cell=nextLine[k];					
-					
-					if(cell.equals("")||cell==null)
+
+					if(ignoreIndexList != null && ignoreIndexList.contains(k))
+						continue;
+
+					xchHandler.startElement("td");					
+					cell = nextLine[k];					
+					if(cell == null || cell.equals(""))
 							xchHandler.characters(" ");
 					else
 							xchHandler.characters(cell);					
@@ -186,8 +155,9 @@ public class ParseTSV extends AbstractParser{
 				xchHandler.endElement("tr");
 			}
 		}
-		xchHandler.endElement("table");
+		csvReader.close();
 		
+		xchHandler.endElement("table");		
 		xchHandler.endDocument();
 		
 	}

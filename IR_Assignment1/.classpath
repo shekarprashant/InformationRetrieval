@@ -2,8 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="/Users/phalkurumashanka/Documents/USC/FALL 2014/CSCI572/Assignments/Assignment1/InformationRetrieval/IR_Assignment1/Dependancies/tika-app-1.6.jar"/>
-	<classpathentry kind="lib" path="/Users/phalkurumashanka/Documents/USC/FALL 2014/CSCI572/Assignments/Assignment1/InformationRetrieval/IR_Assignment1/Dependancies/opencsv-2.2.jar"/>
-	<classpathentry kind="lib" path="/Users/phalkurumashanka/Documents/USC/FALL 2014/CSCI572/Assignments/Assignment1/InformationRetrieval/IR_Assignment1/Dependancies/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/Users/phalkurumashanka/Documents/USC/FALL_2014/CSCI572/Assignments/Assignment1/InformationRetrieval/IR_Assignment1/Dependancies/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/Users/phalkurumashanka/Documents/USC/FALL_2014/CSCI572/Assignments/Assignment1/InformationRetrieval/IR_Assignment1/Dependancies/opencsv-2.2.jar"/>
+	<classpathentry kind="lib" path="/Users/phalkurumashanka/Documents/USC/FALL_2014/CSCI572/Assignments/Assignment1/InformationRetrieval/IR_Assignment1/Dependancies/tika-app-1.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
